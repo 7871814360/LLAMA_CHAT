@@ -1,0 +1,85 @@
+/* ChatApp.css */
+
+.chat-container {
+    padding: 20px;
+    max-width: 80%;
+    max-height: 80%;
+    margin: auto;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    background-color: #f9f9f9;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.messages {
+    max-height: 400px;
+    overflow-y: auto;
+    margin-bottom: 10px;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    background-color: white;
+}
+
+.message {
+    margin: 10px 0;
+    padding: 10px;
+    border-radius: 5px;
+}
+
+.user {
+    background-color: #e7f3fe; /* Light blue for user messages */
+    text-align: right;
+}
+
+.ai {
+    background-color: #d4edda; /* Light green for AI messages */
+    text-align: left;
+}
+
+.input-area {
+    display: flex;
+    align-items: center;
+}
+
+input {
+    flex: 1;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    margin-right: 10px;
+}
+
+button {
+    padding: 10px 15px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+button:hover {
+    background-color: #0056b3;
+}
+
+pre {
+    white-space: pre-wrap; /* Preserve whitespace and line breaks */
+    margin: 0;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+.speech-icon {
+    width: 24px; /* or any desired size */
+    height: 24px; /* or any desired size */
+    fill: none;
+    stroke: currentColor; /* Inherit color from parent */
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    transition: color 0.3s; /* Smooth transition for color changes */
+}
+
+/* Optional: hover effect */
+.speech-icon:hover {
+    color: #007BFF; /* Change color on hover */
+}

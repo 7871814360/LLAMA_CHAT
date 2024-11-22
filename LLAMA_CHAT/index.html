@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat with LLaMA</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f0f0f0;
+        }
+        #chat {
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            padding: 10px;
+            height: 400px;
+            overflow-y: auto;
+            background-color: #fff;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+        }
+        .message {
+            padding: 10px;
+            margin: 5px 0;
+            border-radius: 5px;
+            position: relative;
+            clear: both;
+        }
+        .user {
+            background-color: #d1e7dd;
+            text-align: right;
+            margin-left: 20%;
+        }
+        .ai {
+            background-color: #f8d7da;
+            text-align: left;
+            margin-right: 20%;
+        }
+        pre {
+            background-color: #f4f4f4;
+            padding: 10px;
+            border-radius: 5px;
+            overflow: auto;
+            white-space: pre-wrap;
+            margin: 0;
+        }
+        #user-input {
+            display: flex;
+            margin-top: 10px;
+        }
+        input[type="text"] {
+            flex: 1;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        button {
+            padding: 10px;
+            border: none;
+            background-color: #007bff;
+            color: white;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-left: 10px;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        .speech-icon {
+            cursor: pointer;
+            margin-left: 10px;
+            font-size: 20px;
+            color: #007bff;
+        }
+    </style>
+</head>
+<body>
+
+<h1>Chat with LLaMA</h1>
+<div id="chat"></div>
+<div id="user-input">
+    <input type="text" id="message" placeholder="Type your message here..." />
+    <button onclick="sendMessage()">Send</button>
+</div>
+
+<script>
+    function speech(text) {
+        const utterance = new SpeechSynthesisUtterance(text);
+        const voices = speechSynthesis.getVoices();
+        utterance.voice = voices[0]; // Choose a specific voice
+        speechSynthesis.speak(utterance);
+    }
+
+    async function sendMessage() {
+        const messageInput = document.getElementById('message');
+        const chatDiv = document.getElementById('chat');
+        const userMessage = messageInput.value;
+
+        if (!userMessage) return;
+
+        // Disable input while processing
+        messageInput.disabled = true;
+
+        // Display user message
+        chatDiv.innerHTML += `<div class="message user"><strong>You:</strong> ${userMessage}</div>`;
+        speech(userMessage);
+        messageInput.value = '';
+        chatDiv.scrollTop = chatDiv.scrollHeight; // Scroll to the bottom
+
+        // Send message to the backend
+        const response = await fetch('/chat', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ message: userMessage }),
+        });
+
+        const reader = response.body.getReader();
+        const decoder = new TextDecoder("utf-8");
+        let done = false;
+        let aiMessageChunk = '';
+
+        // Create a new div for the AI response
+        const aiMessageDiv = document.createElement('div');
+        aiMessageDiv.className = 'message ai';
+        aiMessageDiv.innerHTML = `<strong>AI:</strong> `;
+        chatDiv.appendChild(aiMessageDiv);
+        
+        while (!done) {
+            const { done: streamDone, value } = await reader.read();
+            done = streamDone;
+
+            if (value) {
+                // Decode the chunk and append to the AI message div
+                aiMessageChunk += decoder.decode(value, { stream: true });
+                aiMessageDiv.innerHTML += aiMessageChunk; // Display raw AI response
+                chatDiv.scrollTop = chatDiv.scrollHeight; // Scroll to the bottom
+            }
+        }
+
+        // Add speech icon for generated response
+        const speechIcon = document.createElement('span');
+        speechIcon.innerHTML = '🔊'; // You can use any icon here
+        speechIcon.className = 'speech-icon';
+        speechIcon.onclick = () => speech(aiMessageChunk.trim());
+        aiMessageDiv.appendChild(speechIcon);
+
+        // Re-enable input after response is complete
+        messageInput.disabled = false;
+    }
+</script>
+
+</body>
+</html>
